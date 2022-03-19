@@ -158,7 +158,7 @@ int main() {
 	recfifo.openread();
 	string results = "";
 	results = recfifo.recv(); // update to go outside the loop BUT it DO BE unoptimized. Consider server sending seperate message for each
-	recfifo.fifoclose();
+	// recfifo.fifoclose();
 	log("Results from server recieved: " << results);
 
 	// Do first lookup with constVerse here
@@ -186,6 +186,9 @@ int main() {
 					stringstream ss2; // Desparation because ss wont release its current contents 
 					  // ex) 4&3&2&1&1&4:3:2 These are the names of the sons of Aaron: Nadab the firstborn, and Abihu, Eleazar, and Ithamar.
 					  // 4&3&2&1&1& is the string I sent to the server. The rest is to create the verse object later in this client
+					results = recfifo.recv(); // update to go outside the loop BUT it DO BE unoptimized. Consider server sending seperate message for each
+					// recfifo.fifoclose();
+					log("Results from server recieved: " << results);
 					string rptValue[5];
 					rptValue[0] = GetNextToken(results, "&"); // Book
 					rptValue[1] = GetNextToken(results, "&"); // Chap
@@ -220,4 +223,5 @@ int main() {
 		}
 		cout << endl;
 	}
+	recfifo.fifoclose();
 }

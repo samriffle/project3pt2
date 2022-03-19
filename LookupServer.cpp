@@ -64,149 +64,67 @@ int main() {
 		cout << "Bible version: " << bibleVers << endl;
 		
 		Ref ref(b, c, v);
-		Verse verse;
-		LookupResult lookupResult = OTHER;
-
-		string out = "";
-		stringstream ss;
+		Verse lVerse;
+		LookupResult result = OTHER;
 
 		cout << "Now processing..." << endl;
 
 		// Chose index to use for the request
-		int bibleVersionNum = bibleVers;
-		sendfifo.openwrite(); // Open write to client 
-		if (bibleVersionNum == 2) { 
-			// kjv
-			verse = kjvBible.lookup(ref, lookupResult); 
-			if (kjvBible.error(lookupResult) != "") { Verse noVerse; ss << noVerse.getRef().getBook() << "&" << noVerse.getRef().getChap() << "&" << noVerse.getRef().getVerse() << "&" << noVerse.getVerse() << "&" << lookupResult << "&"; out = ss.str(); sendfifo.send(out); }
-			else {
-				// send verse from server
-				ss << verse.getRef().getBook() << "&" << verse.getRef().getChap() << "&" << verse.getRef().getVerse() << "&" << verse.getVerse() << "&" << lookupResult << "&";
-				out = ss.str();
-				log("First verse sent to client");
-				ss.clear();
-				if (nv > 1) {
-					for (int i = 1; i < nv; i++) {
-						Verse verseNext = kjvBible.nextVerse(lookupResult);
-						// send following verses from server
-						ss << verseNext.getRef().getBook() << "&" << verseNext.getRef().getChap() << "&" << verseNext.getRef().getVerse() << "&" << verseNext.getVerse() << "&" << lookupResult << "&";
-						out = ss.str(); 
-						log("Next Verse(s) sent to client");
-						ss.clear();
-						if (lookupResult != SUCCESS) {
-							break;
-						}
-					}
-				}
-				sendfifo.send(out); // Send info as one long string to be split in Server
-			}
+		int bibleVersionNum = bibleVers; 
+		cout << bibleVersionNum << endl;
+		Bible* bible;
+		if (bibleVersionNum == 1) {
+			bible = &webBible;
+		}
+		else if (bibleVersionNum == 2) {
+			bible = &kjvBible;
 		}
 		else if (bibleVersionNum == 3) {
-			// dby
-			verse = dbyBible.lookup(ref, lookupResult); //NOW NOT WORKING HERE AFTER FIRST REQUEST
-														//Pointer in index search may not have reset?
-			if (dbyBible.error(lookupResult) != "") { Verse noVerse; ss << noVerse.getRef().getBook() << "&" << noVerse.getRef().getChap() << "&" << noVerse.getRef().getVerse() << "&" << noVerse.getVerse() << "&" << lookupResult << "&"; out = ss.str(); sendfifo.send(out); }
-			else {
-				// send verse from server
-				ss << verse.getRef().getBook() << "&" << verse.getRef().getChap() << "&" << verse.getRef().getVerse() << "&" << verse.getVerse() << "&" << lookupResult << "&";
-				out = ss.str();
-				log("First verse sent to client");
-				ss.clear();
-				if (nv > 1) {
-					for (int i = 1; i < nv; i++) {
-						Verse verseNext = dbyBible.nextVerse(lookupResult);
-						// send following verses from server
-						ss << verseNext.getRef().getBook() << "&" << verseNext.getRef().getChap() << "&" << verseNext.getRef().getVerse() << "&" << verseNext.getVerse() << "&" << lookupResult << "&";
-						out = ss.str();
-						log("Next Verse(s) sent to client");
-						ss.clear();
-						if (lookupResult != SUCCESS) {
-							break;
-						}
-					}
-				}
-				sendfifo.send(out); // Send info as one long string to be split in Server
-			}
+			bible = &dbyBible;
 		}
 		else if (bibleVersionNum == 4) {
-			// ylt
-			verse = yltBible.lookup(ref, lookupResult); //NOW NOT WORKING HERE AFTER FIRST REQUEST
-														//Pointer in index search may not have reset?
-			if (yltBible.error(lookupResult) != "") { Verse noVerse; ss << noVerse.getRef().getBook() << "&" << noVerse.getRef().getChap() << "&" << noVerse.getRef().getVerse() << "&" << noVerse.getVerse() << "&" << lookupResult << "&"; out = ss.str(); sendfifo.send(out); }
-			else {
-				// send verse from server
-				ss << verse.getRef().getBook() << "&" << verse.getRef().getChap() << "&" << verse.getRef().getVerse() << "&" << verse.getVerse() << "&" << lookupResult << "&";
-				out = ss.str();
-				log("First verse sent to client");
-				ss.clear();
-				if (nv > 1) {
-					for (int i = 1; i < nv; i++) {
-						Verse verseNext = yltBible.nextVerse(lookupResult);
-						// send following verses from server
-						ss << verseNext.getRef().getBook() << "&" << verseNext.getRef().getChap() << "&" << verseNext.getRef().getVerse() << "&" << verseNext.getVerse() << "&" << lookupResult << "&";
-						out = ss.str();
-						log("Next Verse(s) sent to client");
-						ss.clear();
-						if (lookupResult != SUCCESS) {
-							break;
-						}
-					}
-				}
-				sendfifo.send(out); // Send info as one long string to be split in Server
-			}
+			bible = &yltBible;
 		}
 		else if (bibleVersionNum == 5) {
-		// webster
-		verse = websterBible.lookup(ref, lookupResult); //NOW NOT WORKING HERE AFTER FIRST REQUEST
-													//Pointer in index search may not have reset?
-		if (websterBible.error(lookupResult) != "") { Verse noVerse; ss << noVerse.getRef().getBook() << "&" << noVerse.getRef().getChap() << "&" << noVerse.getRef().getVerse() << "&" << noVerse.getVerse() << "&" << lookupResult << "&"; out = ss.str(); sendfifo.send(out); }
-		else {
-			// send verse from server
-			ss << verse.getRef().getBook() << "&" << verse.getRef().getChap() << "&" << verse.getRef().getVerse() << "&" << verse.getVerse() << "&" << lookupResult << "&";
-			out = ss.str();
-			log("First verse sent to client");
-			ss.clear();
-			if (nv > 1) {
-				for (int i = 1; i < nv; i++) {
-					Verse verseNext = websterBible.nextVerse(lookupResult);
-					// send following verses from server
-					ss << verseNext.getRef().getBook() << "&" << verseNext.getRef().getChap() << "&" << verseNext.getRef().getVerse() << "&" << verseNext.getVerse() << "&" << lookupResult << "&";
-					out = ss.str();
-					log("Next Verse(s) sent to client");
-					ss.clear();
-					if (lookupResult != SUCCESS) {
-						break;
-					}
-				}
-			}
-			sendfifo.send(out); // Send info as one long string to be split in Server
-		}
+			bible = &websterBible;
 		}
 		else {
-			// web
-			verse = webBible.lookup(ref, lookupResult); //NOW NOT WORKING HERE AFTER FIRST REQUEST
-														//Pointer in index search may not have reset?
-			if (webBible.error(lookupResult) != "") { Verse noVerse; ss << noVerse.getRef().getBook() << "&" << noVerse.getRef().getChap() << "&" << noVerse.getRef().getVerse() << "&" << noVerse.getVerse() << "&" << lookupResult << "&"; out = ss.str(); sendfifo.send(out); }
+			return 0;
+		}
+		sendfifo.openwrite(); // Open write to client 
+
+		// Return Verse(s)
+		lVerse = bible->lookup(ref, result);
+		if (result != SUCCESS) { Verse noVerse; stringstream ss; ss << noVerse.getRef().getBook() << "&" << noVerse.getRef().getChap() << "&" << noVerse.getRef().getVerse() << "&" << noVerse.getVerse() << "&" << result << "&"; string out = ss.str(); sendfifo.send(out); }
+		else { // successful search
+			int numVerses = nv;
+			if (numVerses <= 0) { Verse noVerse; stringstream ss; ss << noVerse.getRef().getBook() << "&" << noVerse.getRef().getChap() << "&" << noVerse.getRef().getVerse() << "&" << noVerse.getVerse() << "&" << result << "&"; string out = ss.str(); sendfifo.send(out); }
 			else {
-				// send verse from server
-				ss << verse.getRef().getBook() << "&" << verse.getRef().getChap() << "&" << verse.getRef().getVerse() << "&" << verse.getVerse() << "&" << lookupResult << "&";
-				out = ss.str();
-				log("First verse sent to client");
-				ss.clear();
-				if (nv > 1) {
-					for (int i = 1; i < nv; i++) {
-						Verse verseNext = webBible.nextVerse(lookupResult);
-						// send following verses from server
-						ss << verseNext.getRef().getBook() << "&" << verseNext.getRef().getChap() << "&" << verseNext.getRef().getVerse() << "&" << verseNext.getVerse() << "&" << lookupResult << "&";
-						out = ss.str();
-						log("Next Verse(s) sent to client");
-						ss.clear();
-						if (lookupResult != SUCCESS) {
-							break;
+				if (result != SUCCESS) { Verse noVerse; stringstream ss; ss << noVerse.getRef().getBook() << "&" << noVerse.getRef().getChap() << "&" << noVerse.getRef().getVerse() << "&" << noVerse.getVerse() << "&" << result << "&"; string out = ss.str(); sendfifo.send(out); }
+				else {
+					string out = "";
+					stringstream ss;
+					ss << lVerse.getRef().getBook() << "&" << lVerse.getRef().getChap() << "&" << lVerse.getRef().getVerse() << "&" << lVerse.getVerse() << "&" << result << "&";
+					out = ss.str();
+					sendfifo.send(out);
+					ss.flush();
+					ss.clear();
+					if (numVerses > 0 && numVerses != NULL) {
+						for (int i = 1; i < numVerses; i++) { 
+							string out2 = "";
+							stringstream ss2;
+							Verse verseNext = bible->nextVerse(result);
+							ss2 << verseNext.getRef().getBook() << "&" << verseNext.getRef().getChap() << "&" << verseNext.getRef().getVerse() << "&" << verseNext.getVerse() << "&" << result << "&";
+							out2 = ss2.str();
+							sendfifo.send(out2);
+							ss2.flush();
+							ss2.clear();
+							if (result != SUCCESS) {
+								break;
+							}
 						}
 					}
 				}
-				sendfifo.send(out); // Send info as one long string to be split in Server
 			}
 		}
 		sendfifo.fifoclose();  // Close send pipe
@@ -214,5 +132,5 @@ int main() {
 		cout << "Process complete" << endl;
 	}
 	//recfifo.fifoclose();
-	log("close request fifo");
+	//log("close request fifo");
 }
