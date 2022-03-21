@@ -53,7 +53,7 @@ int main() {
 		logFile.open(logFilename.c_str(), ios::out);
 	#endif
 
-	log("Request recieved");
+	log("Request recieved" << '\n');
 
 	// GET THE INPUT DATA
 	// browser sends us a string of field name/value pairs from HTML form
@@ -150,7 +150,7 @@ int main() {
 	out = ss.str();
 	sendfifo.openwrite();
 	sendfifo.send(out); // Send info as one long string to be split in Server
-	log("Request sent to server: " << ss.str());
+	log("Request sent to server: " << ss.str() << '\n');
 	ss.flush();
 	ss.clear();
 	cout << endl;
@@ -159,7 +159,7 @@ int main() {
 	string results = "";
 	results = recfifo.recv(); // update to go outside the loop BUT it DO BE unoptimized. Consider server sending seperate message for each
 	// recfifo.fifoclose();
-	log("Results from server recieved: " << results);
+	log("Results from server recieved: " << results << '\n');
 
 	// Do first lookup with constVerse here
 	string tokenValue[5];
@@ -175,9 +175,25 @@ int main() {
 	ss1.clear();
 
 	// Print first verse, then loop for more
-	if (lookResult != "0") { cout << "<p>" << "Verse search unsuccessful" << "<p>" << endl; }
+	if (lookResult != "0") { 
+		string books[66] = { "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehimiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Songs", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micha", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation" };
+		int errNum = stoi(lookResult);
+
+		if (errNum == 1) {
+			cout << "<p>" << "Error: no such book " << ref.getBook() << "<p>" << endl;
+		}
+		else if (errNum == 2) {
+			cout << "<p>" << "Error: no such chapter " << ref.getChap() << " in " << books[ref.getBook() - 1] << "<p>" << endl;
+		}
+		else if (errNum == 3) {
+			cout << "<p>" << "Error: no such verse " << ref.getVerse() << " in " << books[ref.getBook() - 1] << " " << ref.getChap() << "<p>" << endl;
+		}
+		else {
+			cout << "<p>" << "Verse search unsuccessful" << "<p>" << endl;
+		}
+	}
 	else { // successful search
-		if (verses <= 0) { cout << "<p>" << "Verse search unsuccessful" << "<p>" << endl; }
+		if (verses <= 0) { cout << "<p>" << "No amount of verses to search" << "<p>" << endl; }
 		else {
 			constVerse.display(verses);
 			if (verses > 0 && verses != NULL) {
@@ -188,7 +204,7 @@ int main() {
 					  // 4&3&2&1&1& is the string I sent to the server. The rest is to create the verse object later in this client
 					results = recfifo.recv(); // update to go outside the loop BUT it DO BE unoptimized. Consider server sending seperate message for each
 					// recfifo.fifoclose();
-					log("Results from server recieved: " << results);
+					log("Results from server recieved: " << results << '\n');
 					string rptValue[5];
 					rptValue[0] = GetNextToken(results, "&"); // Book
 					rptValue[1] = GetNextToken(results, "&"); // Chap
@@ -203,7 +219,6 @@ int main() {
 					ss2.clear();
 					cout << endl;
 					if (loopLookResult != "0") { // Change to use result nextVerse returns (status code)
-						cout << "<p>" << "Verse search unsuccessful" << "<p>" << endl;
 						break;
 					}
 					else { // Cons for splitting up books and chapters
